@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.multiplatformResources)
 }
 
-
 android {
     namespace = "com.finblue"
     compileSdk = libs.versions.android.compileSdk.get().toInt()

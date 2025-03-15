@@ -10,7 +10,7 @@ on:
       - "**.md"
       - "*.png"
       - docs
-      - app
+      - androidApp
 
 jobs:
   build:
