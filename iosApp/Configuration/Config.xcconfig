@@ -1,0 +1,14 @@
+//
+//  Config.xcconfig
+//  iosApp
+//
+//  Created by Karel Hudera on 3/12/25.
+//  Copyright © 2025 orgName. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+TEAM_ID=
+BUNDLE_ID=com.finblue.FinBlue
+APP_NAME=FinBlue

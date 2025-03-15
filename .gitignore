@@ -1,0 +1,40 @@
+# IntelliJ / Android Studio
+*.iml
+.idea/
+.DS_Store
+
+# Build artifacts
+.gradle/
+build/
+**/build/
+
+# Kotlin & Native
+.kotlin/
+.externalNativeBuild/
+.cxx/
+
+# Xcode & iOS
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# Dependencies
+Pods/
+
+# Android-specific
+/androidApp/key
+*.jks
+
+# Package managers
+yarn.lock
+
+# Output & Captures
+captures/
+out/
+
+# Local properties & settings
+local.properties

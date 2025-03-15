@@ -1,0 +1,48 @@
+name: FinBlue-iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "*.png"
+      - docs
+      - app
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create local.properties
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" > local.properties
+
+      - name: Run tests
+        run: ./gradlew :shared:iosX64Test
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+
+      - name: Build
+        uses: sersoft-gmbh/xcodebuild-action@v1
+        with:
+          project: iosApp/iosApp.xcodeproj
+          scheme: iosApp
+          destination: name=iPhone 8
+          sdk: iphoneos
+          configuration: Debug
+          action: build
+          use-xcpretty: false
+          build-settings: CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO
