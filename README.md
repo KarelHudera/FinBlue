@@ -1,12 +1,12 @@
-<h1 align="center">
-  <br>
-    [![AppIcon](/docs/media/AppIcon.png)](https://github.com/KarelHudera/FinBlue)
-  <br>
-   [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=plastic)](https://www.apache.org/licenses/LICENSE-2.0)
-   [![FinBlue Android](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-Android.yml?branch=main&logo=Android&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-Android.yml)
-   [![FinBlue iOS](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-iOS.yml?branch-main&logo=Apple&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-iOS.yml)
-  <br>
+<h1 style="text-align: center;">
+    <a href="https://github.com/KarelHudera/FinBlue">
+        <img src="/docs/media/AppIcon.png" alt="AppIcon" width="150">
+    </a>
 </h1>
+
+[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=plastic)](https://www.apache.org/licenses/LICENSE-2.0)
+[![FinBlue Android](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-Android.yml?branch=main&logo=Android&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-Android.yml)
+[![FinBlue iOS](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-iOS.yml?branch-main&logo=Apple&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-iOS.yml)
 
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
