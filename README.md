@@ -1,4 +1,4 @@
-<h1 style="text-align: center;">
+<h1 align="center">
     <a href="https://github.com/KarelHudera/FinBlue">
         <img src="/docs/media/AppIcon.png" alt="AppIcon" width="150">
     </a>
