@@ -6,13 +6,13 @@ Workflow configuration is based on [KaMPKit’s workflows](https://github.com/to
 
 [📄 File](/.github/workflows/FinBlue-Android.yml)
 
-#### Workflow Name
+### Workflow Name
 ```yaml
 name: FinBlue-Android
 ```
 The workflow is named **FinBlue-Android**. This name is displayed in the **GitHub Actions UI**.
 
-#### Trigger Conditions
+### Trigger Conditions
 ```yaml
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ on:
 	- Documentation folder (docs/)
 	- iOS project (iosApp/)
 
-#### Build Job
+### Build Job
 ```yaml
 jobs:
   build:
@@ -42,7 +42,7 @@ jobs:
 ```
 Defines a **single job** named build and the OS/environment for the CI job
 
-#### Checkout Repository
+### Checkout Repository
 ```yaml    
 steps:
   - name: Checkout repository
@@ -50,7 +50,7 @@ steps:
 ```
 Fetches the latest repository code so the workflow can access it.
 
-#### Set Up Java
+### Set Up Java
 ```yaml
   - name: Setup Java
     uses: actions/setup-java@v4
@@ -60,14 +60,14 @@ Fetches the latest repository code so the workflow can access it.
 ```
 Installs Amazon Corretto JDK 21* which is used to build the project.
 
-#### Set Up Gradle
+### Set Up Gradle
 ```yaml
   - name: Setup Gradle
     uses: gradle/actions/setup-gradle@v4
 ```
 Speeds up builds by caching Gradle dependencies.
 
-#### Create local.properties File
+### Create local.properties File
 ```yaml
   - name: Create local.properties
     run: |
@@ -78,7 +78,7 @@ Speeds up builds by caching Gradle dependencies.
 Reads GitHub Secret → ${{ secrets.API_KEY }}.
 Without this step, the build will fail!
 
-#### Build the Project
+### Build the Project
 ```yaml
    - name: Build Project
      run: ./gradlew build
