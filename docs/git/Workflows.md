@@ -43,7 +43,7 @@ jobs:
 Defines a **single job** named build and the OS/environment for the CI job
 
 ### Checkout Repository
-```yaml    
+```yaml  
 steps:
   - name: Checkout repository
     uses: actions/checkout@v4

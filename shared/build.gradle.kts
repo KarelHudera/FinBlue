@@ -3,13 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.codingfeline.buildkonfig.compiler.FieldSpec
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.buildKonfig)
+    alias(libs.plugins.build.konfig)
     alias(libs.plugins.skie)
-    alias(libs.plugins.multiplatformResources)
+    alias(libs.plugins.multiplatform.resources)
     alias(libs.plugins.sqldelight)
 }
 
