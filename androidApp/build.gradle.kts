@@ -23,7 +23,7 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}" // Exclude license files from resources
         }
     }
     buildTypes {
@@ -42,28 +42,38 @@ android {
 }
 
 dependencies {
+    // Compose Libraries
     implementation(compose.preview)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-    implementation(libs.koin.compose.viewmodel)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.kotlinx.serialization)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.ktor)
-    implementation(libs.moko.resources)
     implementation(compose.material3)
-
     implementation(compose.runtime)
     implementation(compose.foundation)
     implementation(compose.ui)
     implementation(compose.components.resources)
     implementation(compose.components.uiToolingPreview)
+
+    // AndroidX Libraries
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(projects.shared)
-    implementation(libs.kotlinx.serialization)
 
+    // Koin Libraries (Dependency Injection)
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+
+    // Networking & Serialization
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor)
+
+    // Multiplatform Resources
+    implementation(libs.moko.resources)
+
+    // Shared Module Dependency
+    implementation(projects.shared)
+
+    // Debugging Tools
     debugImplementation(compose.uiTooling)
 }
