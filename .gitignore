@@ -38,3 +38,6 @@ out/
 
 # Local properties & settings
 local.properties
+
+# Obsidian documentation
+/.obsidian/

@@ -8,6 +8,7 @@
 
 import SwiftUI
 import shared
+import SDWebImageSwiftUI
 
 struct FBItem: View {
     var movie: Movie
@@ -27,6 +28,14 @@ struct FBItem: View {
             .frame(width: width, height: Constants.frameHeight)
         return VStack(alignment: .leading) {
             if let posterUrl = imageUrl {
+                WebImage(url: URL(string: String(format: posterUrl))) { image in
+                    image
+                        .resizable()
+                        .frame(width: width, height: Constants.frameHeight)
+                        .clipShape(shape)
+                } placeholder: {
+                    placeHolder
+                }
                 Text(movie.name)
                     .font(.caption)
                     .truncationMode(.tail)

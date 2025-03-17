@@ -1,15 +1,11 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.multiplatformResources)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.multiplatform.resources)
 }
-
 
 android {
     namespace = "com.finblue"
@@ -27,7 +23,7 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}" // Exclude license files from resources
         }
     }
     buildTypes {
@@ -40,47 +36,44 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
-}
-
-kotlin {
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
-    sourceSets {
-
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.koin.core)
-            implementation(libs.koin.android)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.kotlinx.serialization)
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network.ktor)
-            implementation(libs.moko.resources)
-            implementation(compose.material3)
-        }
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.shared)
-            implementation(libs.kotlinx.serialization)
-        }
+    kotlinOptions {
+        jvmTarget = "21"
     }
 }
 
 dependencies {
+    // Compose Libraries
+    implementation(compose.preview)
+    implementation(compose.material3)
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.ui)
+    implementation(compose.components.resources)
+    implementation(compose.components.uiToolingPreview)
+
+    // AndroidX Libraries
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Koin Libraries (Dependency Injection)
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+
+    // Networking & Serialization
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor)
+
+    // Multiplatform Resources
+    implementation(libs.moko.resources)
+
+    // Shared Module Dependency
+    implementation(projects.shared)
+
+    // Debugging Tools
     debugImplementation(compose.uiTooling)
 }

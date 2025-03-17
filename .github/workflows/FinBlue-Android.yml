@@ -10,7 +10,7 @@ on:
       - "**.md"
       - "*.png"
       - docs
-      - ios
+      - iosApp
 
 jobs:
   build:
