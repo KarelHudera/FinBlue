@@ -48,27 +48,16 @@ API_KEY=api_key
 
 ## Libraries
 
-* [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) - Simplify the development
-  of cross-platform projects and reduce the time spent writing and maintaining the same code for
-  different platforms.
-* [Ktor Client](https://ktor.io/docs/welcome.html) - Ktor includes a multiplatform asynchronous HTTP
-  client, which allows you to make requests and handle responses.
-* [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) - Kotlin multiplatform /
-  multi-format reflectionless serialization
-* [Koin](https://github.com/InsertKoinIO/koin) - is a lightweight dependency injection framework for
-  Kotlin & Kotlin Multiplatform.
-* [Kotlin coroutines](https://developer.android.com/kotlin/coroutines) - Executing code
-  asynchronously.
-* [StateFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) - is a
-  state-holder observable flow that emits the current and new state updates to its collectors.
-* [Coil-compose](https://coil-kt.github.io/coil/compose/) - An image loading library for Android
-  backed by Kotlin Coroutines.
-* [SKIE](https://github.com/touchlab/SKIE) - A tool for Kotlin Multiplatform development that
-  enhances the Swift API published from Kotlin.
-* [SQLDelight](https://github.com/sqldelight/sqldelight) - generates typesafe Kotlin APIs from your
-  SQL statements.
-* [moko-resources](https://github.com/icerockdev/moko-resources) - provides access to the resources
-  on macOS, iOS, Android the JVM and JS/Browser with the support of the default system localization.
-* [BuildKonfig](https://github.com/yshrsmz/BuildKonfig) - BuildConfig for Kotlin Multiplatform
-  Project.
-* [Napier](https://github.com/AAkira/Napier) - logger library for Kotlin Multiplatform project.
+* [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) - Enables cross-platform development while maintaining a single codebase.
+* [Ktor Client](https://ktor.io/docs/welcome.html) - An asynchronous, multiplatform HTTP client for making requests and handling responses.
+* [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) - Reflectionless, multiplatform serialization for Kotlin.
+* [Koin](https://github.com/InsertKoinIO/koin) - A lightweight dependency injection framework for Kotlin and Kotlin Multiplatform.
+* [Kotlin Coroutines](https://developer.android.com/kotlin/coroutines) - A framework for writing asynchronous, concurrent code in Kotlin.
+* [StateFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) - A state-holder observable flow that emits updates to its collectors.
+* [Coil](https://coil-kt.github.io/coil/compose/) - An image loading library for Jetpack Compose powered by Kotlin Coroutines.
+* [SDWebImageSwiftUI](https://github.com/SDWebImage/SDWebImageSwiftUI) - A SwiftUI image loading framework for iOS that supports caching and remote image loading.
+* [SKIE](https://github.com/touchlab/SKIE) - A tool that improves Swift API interoperability with Kotlin Multiplatform.
+* [SQLDelight](https://github.com/sqldelight/sqldelight) - A Kotlin library that generates type-safe APIs from SQL statements.
+* [moko-resources](https://github.com/icerockdev/moko-resources) - Provides a way to access resources across multiple platforms, supporting system localization.
+* [BuildKonfig](https://github.com/yshrsmz/BuildKonfig) - A configuration management tool for Kotlin Multiplatform projects.
+* [Napier](https://github.com/AAkira/Napier) - A Kotlin Multiplatform logging library.  
