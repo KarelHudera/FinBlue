@@ -18,13 +18,18 @@ fun App(viewModel: PortfolioViewModel = koinViewModel<PortfolioViewModel>()) {
         // Collect the portfolio state from the ViewModel
         val portfolioState by viewModel.portfolioState.collectAsStateWithLifecycle()
 
-        when(val currentState = portfolioState) {
+        when (val currentState = portfolioState) {
             is PortfolioListUiState.Loading -> ProgressScreen()
             is PortfolioListUiState.Error -> ErrorScreen(currentState.message) {
                 viewModel.loadPortfolios()
             }
+
             is PortfolioListUiState.Success -> {
-                PortfolioScreen(currentState.portfolios)
+                PortfolioScreen(
+                    currentState.portfolios,
+                    onCreatePortfolio = { portfolio ->
+                        viewModel.createPortfolio(portfolio)
+                    })
             }
         }
     }

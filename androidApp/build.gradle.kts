@@ -76,4 +76,6 @@ dependencies {
 
     // Debugging Tools
     debugImplementation(compose.uiTooling)
+
+    implementation(libs.kotlinx.datetime)
 }

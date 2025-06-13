@@ -161,15 +161,7 @@ class PortfolioViewModel(
             description = "Your primary investment portfolio",
             createdAt = Clock.System.now().toEpochMilliseconds(),
         )
-        val mainPortfolio2 = Portfolio(
-            id = "main_portfolio",
-            name = "Main Portfolio",
-            brokerBank = null, // User can set this later
-            baseCurrency = "USD",
-            description = "Your primary investment portfolio",
-            createdAt = Clock.System.now().toEpochMilliseconds(),
-        )
-        createPortfolio(mainPortfolio2)
+
         createPortfolio(mainPortfolio)
     }
 

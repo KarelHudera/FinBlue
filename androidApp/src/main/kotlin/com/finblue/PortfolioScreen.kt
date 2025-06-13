@@ -1,6 +1,7 @@
 package com.finblue
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,10 +24,21 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,22 +66,60 @@ import com.finblue.utils.Dimens.FB_36_dp
 import com.finblue.utils.Dimens.FB_4_dp
 import com.finblue.utils.Dimens.FB_6_dp
 import com.finblue.utils.pagerTransition
+import kotlinx.coroutines.launch
+import java.util.UUID
+import kotlinx.datetime.Clock
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioScreen(
     collection: List<Portfolio>,
+    onCreatePortfolio: (Portfolio) -> Unit = {},
 ) {
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     ScrollTopBar {
         FeedCollectionList(
-            collection,
+            collection = collection,
+            onAddPortfolioClick = { showBottomSheet = true },
             modifier = Modifier.padding(it)
         )
+    }
+
+    // Bottom Sheet for creating new portfolio
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState
+        ) {
+            CreatePortfolioBottomSheet(
+                onCreatePortfolio = { portfolio ->
+                    onCreatePortfolio(portfolio)
+                    scope.launch {
+                        bottomSheetState.hide()
+                        showBottomSheet = false
+                    }
+                },
+                onDismiss = {
+                    scope.launch {
+                        bottomSheetState.hide()
+                        showBottomSheet = false
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
-private fun FeedCollectionList(collection: List<Portfolio>, modifier: Modifier = Modifier) {
+private fun FeedCollectionList(
+    collection: List<Portfolio>,
+    onAddPortfolioClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (collection.isEmpty()) {
         EmptyPortfolioMessage()
         return
@@ -79,6 +129,7 @@ private fun FeedCollectionList(collection: List<Portfolio>, modifier: Modifier =
         item {
             PortfolioCarousel(
                 portfolios = collection,
+                onAddPortfolioClick = onAddPortfolioClick,
                 modifier = modifier
             )
         }
@@ -86,12 +137,16 @@ private fun FeedCollectionList(collection: List<Portfolio>, modifier: Modifier =
 }
 
 @Composable
-private fun AddPortfolioCard(modifier: Modifier = Modifier) {
+private fun AddPortfolioCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(FB_180_dp)
-            .clip(RoundedCornerShape(FB_10_dp)),
+            .clip(RoundedCornerShape(FB_10_dp))
+            .clickable { onClick() },
         shape = RoundedCornerShape(FB_10_dp),
     ) {
         Box(
@@ -111,7 +166,11 @@ private fun AddPortfolioCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PortfolioCarousel(portfolios: List<Portfolio>, modifier: Modifier = Modifier) {
+private fun PortfolioCarousel(
+    portfolios: List<Portfolio>,
+    onAddPortfolioClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val pagerState = rememberPagerState(pageCount = { portfolios.size + 1})
 
     Header(title = "Portfolios", modifier = modifier)
@@ -133,6 +192,7 @@ private fun PortfolioCarousel(portfolios: List<Portfolio>, modifier: Modifier = 
             }
         } else {
             AddPortfolioCard(
+                onClick = onAddPortfolioClick,
                 modifier = Modifier.pagerTransition(
                     pagerState = pagerState,
                     page = page,
@@ -162,6 +222,99 @@ private fun PortfolioCarousel(portfolios: List<Portfolio>, modifier: Modifier = 
                     .size(FB_6_dp),
             )
         }
+    }
+}
+
+@Composable
+private fun CreatePortfolioBottomSheet(
+    onCreatePortfolio: (Portfolio) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var portfolioName by remember { mutableStateOf("") }
+    var brokerBank by remember { mutableStateOf("") }
+    var baseCurrency by remember { mutableStateOf("USD") }
+    var description by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(FB_16_dp),
+        verticalArrangement = Arrangement.spacedBy(FB_16_dp)
+    ) {
+        Text(
+            text = "Create New Portfolio",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        OutlinedTextField(
+            value = portfolioName,
+            onValueChange = { portfolioName = it },
+            label = { Text("Portfolio Name") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        OutlinedTextField(
+            value = brokerBank,
+            onValueChange = { brokerBank = it },
+            label = { Text("Broker/Bank (Optional)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        OutlinedTextField(
+            value = baseCurrency,
+            onValueChange = { baseCurrency = it },
+            label = { Text("Base Currency") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Description (Optional)") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(FB_12_dp)
+        ) {
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cancel")
+            }
+
+            Button(
+                onClick = {
+                    if (portfolioName.isNotBlank()) {
+                        val portfolio = Portfolio(
+                            id = UUID.randomUUID().toString(),
+                            name = portfolioName.trim(),
+                            brokerBank = brokerBank.trim().takeIf { it.isNotBlank() },
+                            baseCurrency = baseCurrency.trim(),
+                            description = description.trim().takeIf { it.isNotBlank() },
+                            createdAt = Clock.System.now().toEpochMilliseconds(),
+                        )
+                        onCreatePortfolio(portfolio)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = portfolioName.isNotBlank()
+            ) {
+                Text("Create")
+            }
+        }
+
+        // Add some bottom padding for the bottom sheet
+        Spacer(modifier = Modifier.height(FB_32_dp))
     }
 }
 
