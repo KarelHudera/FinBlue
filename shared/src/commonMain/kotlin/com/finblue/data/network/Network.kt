@@ -29,7 +29,7 @@ val ktorModule = module {
         HttpClient {
             expectSuccess = true
             defaultRequest {
-                url("http://api.themoviedb.org/3/")
+                url("") // TODO: Set the base URL
                 url {
                     parameters.append("api_key", BuildKonfig.API_KEY)
                 }

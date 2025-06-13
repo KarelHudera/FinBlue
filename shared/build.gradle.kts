@@ -73,6 +73,8 @@ kotlin {
             // Logging utility and resources management
             implementation(libs.napier)
             implementation(libs.moko.resources)
+
+            implementation(libs.kotlinx.datetime)
         }
 
         commonTest.dependencies {
