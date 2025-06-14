@@ -1,5 +1,6 @@
 package com.finblue
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,18 +20,21 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -67,8 +71,8 @@ import com.finblue.utils.Dimens.FB_4_dp
 import com.finblue.utils.Dimens.FB_6_dp
 import com.finblue.utils.pagerTransition
 import kotlinx.coroutines.launch
-import java.util.UUID
 import kotlinx.datetime.Clock
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,12 +85,30 @@ fun PortfolioScreen(
     val bottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    ScrollTopBar {
-        FeedCollectionList(
-            collection = collection,
-            onAddPortfolioClick = { showBottomSheet = true },
-            modifier = Modifier.padding(it)
-        )
+    Log.d("PortfolDDDDbJBDJIWBAJBDSAJKBDKSJABDSAJKBDJKSABJKDBASJKBDAKSBJKDBSAJKBDJKASBJDKABSJKBDJAKSBJKASBJKDBJKASBJKDASBKJDBASJKBDJKASBJDBJAKBSDJKBASJKBDJKASioScreen", "Collection size: ${UUID.randomUUID()}")
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    // No functionality - just a placeholder FAB
+                },
+                containerColor = Color(0xFF0055AA),
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
+            }
+        }
+    ) { paddingValues ->
+        ScrollTopBar {
+            FeedCollectionList(
+                collection = collection,
+                onAddPortfolioClick = { showBottomSheet = true },
+                modifier = Modifier.padding(it).padding(paddingValues)
+            )
+        }
     }
 
     // Bottom Sheet for creating new portfolio

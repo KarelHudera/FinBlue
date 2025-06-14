@@ -154,14 +154,13 @@ class PortfolioViewModel(
     // Create main portfolio (default portfolio)
     fun createMainPortfolio() {
         val mainPortfolio = Portfolio(
-            id = "main_portfolio2",
-            name = "Main Portfolio2",
+            id = "5e7d6795-8f40-4130-9f4a-e5dc0afe9957",
+            name = "Default Portfolio",
             brokerBank = null, // User can set this later
             baseCurrency = "USD",
-            description = "Your primary investment portfolio",
+            description = "Default investment portfolio",
             createdAt = Clock.System.now().toEpochMilliseconds(),
         )
-
         createPortfolio(mainPortfolio)
     }
 
