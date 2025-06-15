@@ -73,9 +73,13 @@ dependencies {
 
     // Shared Module Dependency
     implementation(projects.shared)
+    implementation(libs.androidx.navigation.common.android)
 
     // Debugging Tools
     debugImplementation(compose.uiTooling)
 
     implementation(libs.kotlinx.datetime)
+
+    // Navigation
+    implementation(libs.androidx.navigation)
 }

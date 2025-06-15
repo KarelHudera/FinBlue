@@ -1,6 +1,5 @@
 package com.finblue
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,19 +77,19 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioScreen(
-    collection: List<Portfolio>,
+    portfolios: List<Portfolio>,
     onCreatePortfolio: (Portfolio) -> Unit = {},
+    onNavigateToCreateTransaction: () -> Unit = {}
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    Log.d("PortfolDDDDbJBDJIWBAJBDSAJKBDKSJABDSAJKBDJKSABJKDBASJKBDAKSBJKDBSAJKBDJKASBJDKABSJKBDJAKSBJKASBJKDBJKASBJKDASBKJDBASJKBDJKASBJDBJAKBSDJKBASJKBDJKASioScreen", "Collection size: ${UUID.randomUUID()}")
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // No functionality - just a placeholder FAB
+                    onNavigateToCreateTransaction()
                 },
                 containerColor = Color(0xFF0055AA),
                 contentColor = Color.White
@@ -104,9 +103,9 @@ fun PortfolioScreen(
     ) { paddingValues ->
         ScrollTopBar {
             FeedCollectionList(
-                collection = collection,
+                collection = portfolios,
                 onAddPortfolioClick = { showBottomSheet = true },
-                modifier = Modifier.padding(it).padding(paddingValues)
+                modifier = Modifier.padding(it)
             )
         }
     }
