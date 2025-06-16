@@ -464,15 +464,43 @@ private fun CreateAssetDialog(
             TextButton(
                 onClick = {
                     if (selectedPortfolio != null && symbol.isNotBlank() && name.isNotBlank()) {
-                        val asset = Asset(
-                            id = UUID.randomUUID().toString(),
-                            portfolioId = selectedPortfolio.id,
-                            symbol = symbol,
-                            name = name,
-                            assetType = assetType,
-                            createdAt = Clock.System.now().toEpochMilliseconds()
-                        )
-                       // viewModel.createAsset(asset)
+                        val newAsset: Asset = when (assetType) {
+                            "stock" -> Asset.Stock(
+                                id = UUID.randomUUID().toString(),
+                                portfolioId = selectedPortfolio.id,
+                                symbol = symbol,
+                                name = name,
+                                createdAt = Clock.System.now().toEpochMilliseconds(),
+                                exchange = "NASDAQ" // TODO: Allow user input later
+                            )
+                            "crypto" -> Asset.Crypto(
+                                id = UUID.randomUUID().toString(),
+                                portfolioId = selectedPortfolio.id,
+                                symbol = symbol,
+                                name = name,
+                                createdAt = Clock.System.now().toEpochMilliseconds(),
+                                blockchain = "Ethereum" // TODO: Allow user input later
+                            )
+                            "fiat" -> Asset.Fiat(
+                                id = UUID.randomUUID().toString(),
+                                portfolioId = selectedPortfolio.id,
+                                symbol = symbol,
+                                name = name,
+                                createdAt = Clock.System.now().toEpochMilliseconds(),
+                                country = "USA" // TODO: Allow user input later
+                            )
+                            "other" -> Asset.Other(
+                                id = UUID.randomUUID().toString(),
+                                portfolioId = selectedPortfolio.id,
+                                symbol = symbol,
+                                name = name,
+                                createdAt = Clock.System.now().toEpochMilliseconds(),
+                                category = "collectible" // TODO: Allow user input later
+                            )
+                            else -> return@TextButton // fail silently for now
+                        }
+
+                        viewModel.createAsset(newAsset)
                     }
                 },
                 enabled = selectedPortfolio != null && symbol.isNotBlank() && name.isNotBlank() &&

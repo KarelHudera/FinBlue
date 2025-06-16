@@ -1,5 +1,7 @@
 package com.finblue
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -52,9 +55,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.finblue.common.ScrollTopBar
+import com.finblue.domain.model.Asset
 import com.finblue.domain.model.Portfolio
 import com.finblue.utils.Dimens.FB_10_dp
 import com.finblue.utils.Dimens.FB_120_dp
@@ -74,6 +79,7 @@ import kotlinx.datetime.Clock
 import java.util.UUID
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioScreen(
@@ -100,7 +106,7 @@ fun PortfolioScreen(
                 )
             }
         }
-    ) { paddingValues ->
+    ) {
         ScrollTopBar {
             FeedCollectionList(
                 collection = portfolios,
@@ -153,6 +159,9 @@ private fun FeedCollectionList(
                 onAddPortfolioClick = onAddPortfolioClick,
                 modifier = modifier
             )
+        }
+        item {
+
         }
     }
 }

@@ -66,6 +66,21 @@ class PortfolioViewModel(
     private val _selectedPortfolioId = MutableStateFlow<String?>(null)
     val selectedPortfolioId: StateFlow<String?> = _selectedPortfolioId.asStateFlow()
 
+    private val _assetsByPortfolioState = MutableStateFlow<AssetListUiState>(AssetListUiState.Loading)
+    val assetsByPortfolioState: StateFlow<AssetListUiState> = _assetsByPortfolioState
+
+    fun loadAssetsByPortfolio(portfolioId: String) {
+        viewModelScope.launch {
+            repository.getAssetsByPortfolio(portfolioId).collect { result ->
+                _assetsByPortfolioState.value = when (result) {
+                    is Async.Loading -> AssetListUiState.Loading
+                    is Async.Error -> AssetListUiState.Error(result.message)
+                    is Async.Success -> AssetListUiState.Success(result.data)
+                }
+            }
+        }
+    }
+
     // Combined state for dashboard view
     val dashboardState = combine(
         portfolioState,
@@ -182,6 +197,29 @@ class PortfolioViewModel(
                         _operationState.value = OperationUiState.Success("Portfolio created successfully")
                         loadPortfolios() // Refresh the list
                         Napier.d("Portfolio created successfully: ${portfolio.name}")
+                    }
+                }
+            }
+        }
+    }
+
+    fun createAsset(asset: Asset) {
+        viewModelScope.launch {
+            _operationState.value = OperationUiState.Loading
+
+            repository.insertAsset(asset).collect { result ->
+                when (result) {
+                    is Async.Loading -> {
+                        // Already handled above
+                    }
+                    is Async.Error -> {
+                        _operationState.value = OperationUiState.Error("Failed to create asset: ${result.message}")
+                        Napier.e("❌ Failed to create asset: ${result.message}")
+                    }
+                    is Async.Success -> {
+                        _operationState.value = OperationUiState.Success("Asset created successfully")
+                        loadAssets() // Refresh the asset list
+                        Napier.d("✅ Asset created successfully: ${asset.name}")
                     }
                 }
             }

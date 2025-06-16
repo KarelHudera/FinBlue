@@ -11,15 +11,24 @@ import com.finblue.domain.model.Transaction
 import com.finblue.utils.Async
 import io.github.aakira.napier.Napier
 
+
 interface PortfolioRepositoryInterface {
     fun getAllPortfolios(): Flow<Async<List<Portfolio>>>
     fun getAllAssets(): Flow<Async<List<Asset>>>
     fun getAllTransactions(): Flow<Async<List<Transaction>>>
+    fun getAssetsByPortfolio(portfolioId: String): Flow<Async<List<Asset>>>
+
     suspend fun insertPortfolio(portfolio: Portfolio): Flow<Async<Unit>>
     suspend fun removePortfolio(portfolioId: String): Flow<Async<Unit>>
+
+    suspend fun insertAsset(asset: Asset): Flow<Async<Unit>>
+    suspend fun removeAsset(assetId: String): Flow<Async<Unit>>
+
     suspend fun insertTransaction(transaction: Transaction): Flow<Async<Unit>>
     suspend fun removeTransaction(transactionId: String): Flow<Async<Unit>>
+
     suspend fun clearAndCreatePortfolios(portfolios: List<Portfolio>): Flow<Async<Unit>>
+    suspend fun clearAndCreateAssets(assets: List<Asset>): Flow<Async<Unit>>
     suspend fun clearAndCreateTransactions(transactions: List<Transaction>): Flow<Async<Unit>>
 }
 
@@ -64,6 +73,18 @@ class PortfolioRepository(
         }
     }.flowOn(ioDispatcher)
 
+    override fun getAssetsByPortfolio(portfolioId: String): Flow<Async<List<Asset>>> = flow {
+        emit(Async.Loading)
+        try {
+            val assets = database.getAssetsByPortfolio(portfolioId)
+            Napier.d("\uD83D\uDFE9\uD83D\uDFE9 Successfully retrieved ${assets.size} assets for portfolio: $portfolioId")
+            emit(Async.Success(assets))
+        } catch (e: Exception) {
+            Napier.e("Failed to get assets for portfolio: $portfolioId", e)
+            emit(Async.Error(e.message ?: "Unknown error occurred while fetching portfolio assets"))
+        }
+    }.flowOn(ioDispatcher)
+
     override suspend fun insertPortfolio(portfolio: Portfolio): Flow<Async<Unit>> = flow {
         emit(Async.Loading)
         try {
@@ -85,6 +106,36 @@ class PortfolioRepository(
         } catch (e: Exception) {
             Napier.e("Failed to remove portfolio: $portfolioId", e)
             emit(Async.Error(e.message ?: "Unknown error occurred while removing portfolio"))
+        }
+    }.flowOn(ioDispatcher)
+
+    override suspend fun insertAsset(asset: Asset): Flow<Async<Unit>> = flow {
+        emit(Async.Loading)
+        try {
+            database.insertAsset(asset)
+            val assetType = when (asset) {
+                is Asset.Stock -> "stock (${asset.exchange})"
+                is Asset.Crypto -> "crypto (${asset.blockchain})"
+                is Asset.Fiat -> "fiat (${asset.country})"
+                is Asset.Other -> "other (${asset.category})"
+            }
+            Napier.d("\uD83D\uDFE9\uD83D\uDFE9 Successfully inserted $assetType asset: ${asset.name}")
+            emit(Async.Success(Unit))
+        } catch (e: Exception) {
+            Napier.e("Failed to insert asset: ${asset.name}", e)
+            emit(Async.Error(e.message ?: "Unknown error occurred while inserting asset"))
+        }
+    }.flowOn(ioDispatcher)
+
+    override suspend fun removeAsset(assetId: String): Flow<Async<Unit>> = flow {
+        emit(Async.Loading)
+        try {
+            database.removeAsset(assetId)
+            Napier.d("\uD83D\uDFE9\uD83D\uDFE9 Successfully removed asset: $assetId")
+            emit(Async.Success(Unit))
+        } catch (e: Exception) {
+            Napier.e("Failed to remove asset: $assetId", e)
+            emit(Async.Error(e.message ?: "Unknown error occurred while removing asset"))
         }
     }.flowOn(ioDispatcher)
 
@@ -121,6 +172,18 @@ class PortfolioRepository(
         } catch (e: Exception) {
             Napier.e("Failed to clear and create portfolios", e)
             emit(Async.Error(e.message ?: "Unknown error occurred while clearing and creating portfolios"))
+        }
+    }.flowOn(ioDispatcher)
+
+    override suspend fun clearAndCreateAssets(assets: List<Asset>): Flow<Async<Unit>> = flow {
+        emit(Async.Loading)
+        try {
+            database.clearAndCreateAssets(assets)
+            Napier.d("\uD83D\uDFE9\uD83D\uDFE9 Successfully cleared and created ${assets.size} assets")
+            emit(Async.Success(Unit))
+        } catch (e: Exception) {
+            Napier.e("Failed to clear and create assets", e)
+            emit(Async.Error(e.message ?: "Unknown error occurred while clearing and creating assets"))
         }
     }.flowOn(ioDispatcher)
 
