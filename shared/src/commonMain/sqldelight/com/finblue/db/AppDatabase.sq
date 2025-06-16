@@ -46,7 +46,6 @@ CREATE TABLE fiat (
 CREATE TABLE others (
     asset_id TEXT NOT NULL PRIMARY KEY,
     category TEXT NOT NULL CHECK (category IN ('real_estate', 'collectible', 'commodity')),
-    condition_description TEXT,
     description TEXT,
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
 );
@@ -72,11 +71,15 @@ CREATE INDEX transactions_type ON transactions(type);
 CREATE INDEX transactions_transaction_date ON transactions(transaction_date);
 CREATE INDEX transactions_created_at ON transactions(created_at);
 
--- Queries for Portfolios
 selectAllPortfolios:
 SELECT *
 FROM portfolios
 ORDER BY created_at DESC;
+
+selectPortfolioById:
+SELECT *
+FROM portfolios
+WHERE portfolio_id = ?;
 
 insertPortfolio:
 INSERT INTO portfolios (portfolio_id, name, broker_bank, base_currency, description, created_at)
@@ -86,13 +89,11 @@ removePortfolio:
 DELETE FROM portfolios
 WHERE portfolio_id = ?;
 
--- Queries for Assets
 selectAllAssets:
 SELECT *
 FROM assets
 ORDER BY created_at DESC;
 
--- Queries for Transactions
 selectAllTransactions:
 SELECT *
 FROM transactions
@@ -106,10 +107,6 @@ removeTransaction:
 DELETE FROM transactions
 WHERE transaction_id = ?;
 
-
--- Add these queries to your existing .sq file
-
--- Basic Asset Operations
 insertAsset:
 INSERT INTO assets (asset_id, portfolio_id, symbol, name, asset_type, created_at)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -118,7 +115,6 @@ removeAsset:
 DELETE FROM assets
 WHERE asset_id = ?;
 
--- Asset Type-Specific Insertions
 insertStock:
 INSERT INTO stocks (asset_id, exchange)
 VALUES (?, ?);
@@ -132,117 +128,22 @@ INSERT INTO fiat (asset_id, country)
 VALUES (?, ?);
 
 insertOther:
-INSERT INTO others (asset_id, category, condition_description, description)
-VALUES (?, ?, ?, ?);
+INSERT INTO others (asset_id, category, description)
+VALUES (?, ?,  ?);
 
--- Queries to get assets with their type-specific information
-selectAllAssetsWithDetails:
+
+selectTransactionsByPortfolio:
 SELECT
-    a.asset_id,
-    a.portfolio_id,
-    a.symbol,
-    a.name,
-    a.asset_type,
-    a.created_at,
-    s.exchange,
-    c.blockchain,
-    f.country,
-    o.category,
-    o.condition_description,
-    o.description
-FROM assets a
-LEFT JOIN stocks s ON a.asset_id = s.asset_id
-LEFT JOIN crypto c ON a.asset_id = c.asset_id
-LEFT JOIN fiat f ON a.asset_id = f.asset_id
-LEFT JOIN others o ON a.asset_id = o.asset_id
-ORDER BY a.created_at DESC;
-
-selectAssetWithDetails:
-SELECT
-    a.asset_id,
-    a.portfolio_id,
-    a.symbol,
-    a.name,
-    a.asset_type,
-    a.created_at,
-    s.exchange,
-    c.blockchain,
-    f.country,
-    o.category,
-    o.condition_description,
-    o.description
-FROM assets a
-LEFT JOIN stocks s ON a.asset_id = s.asset_id
-LEFT JOIN crypto c ON a.asset_id = c.asset_id
-LEFT JOIN fiat f ON a.asset_id = f.asset_id
-LEFT JOIN others o ON a.asset_id = o.asset_id
-WHERE a.asset_id = ?;
-
--- Get assets by portfolio with details
-selectAssetsByPortfolioWithDetails:
-SELECT
-    a.asset_id,
-    a.portfolio_id,
-    a.symbol,
-    a.name,
-    a.asset_type,
-    a.created_at,
-    s.exchange,
-    c.blockchain,
-    f.country,
-    o.category,
-    o.condition_description,
-    o.description
-FROM assets a
-LEFT JOIN stocks s ON a.asset_id = s.asset_id
-LEFT JOIN crypto c ON a.asset_id = c.asset_id
-LEFT JOIN fiat f ON a.asset_id = f.asset_id
-LEFT JOIN others o ON a.asset_id = o.asset_id
-WHERE a.portfolio_id = ?
-ORDER BY a.created_at DESC;
-
--- Type-specific queries (if you need them separately)
-selectStockAssets:
-SELECT a.*, s.exchange
-FROM assets a
-JOIN stocks s ON a.asset_id = s.asset_id
-ORDER BY a.created_at DESC;
-
-selectCryptoAssets:
-SELECT a.*, c.blockchain
-FROM assets a
-JOIN crypto c ON a.asset_id = c.asset_id
-ORDER BY a.created_at DESC;
-
-selectFiatAssets:
-SELECT a.*, f.country
-FROM assets a
-JOIN fiat f ON a.asset_id = f.asset_id
-ORDER BY a.created_at DESC;
-
-selectOtherAssets:
-SELECT a.*, o.category, o.condition_description, o.description
-FROM assets a
-JOIN others o ON a.asset_id = o.asset_id
-ORDER BY a.created_at DESC;
-
-selectAssetsByPortfolio:
-SELECT
-    a.asset_id,
-    a.portfolio_id,
-    a.symbol,
-    a.name,
-    a.asset_type,
-    a.created_at,
-    s.exchange,
-    c.blockchain,
-    f.country,
-    o.category,
-    o.condition_description,
-    o.description
-FROM assets a
-LEFT JOIN stocks s ON a.asset_id = s.asset_id
-LEFT JOIN crypto c ON a.asset_id = c.asset_id
-LEFT JOIN fiat f ON a.asset_id = f.asset_id
-LEFT JOIN others o ON a.asset_id = o.asset_id
-WHERE a.portfolio_id = ?;
+    transaction_id,
+    portfolio_id,
+    asset_id,
+    type,
+    quantity,
+    price,
+    currency,
+    notes,
+    transaction_date,
+    created_at
+FROM transactions
+WHERE portfolio_id = ?
+ORDER BY transaction_date DESC;

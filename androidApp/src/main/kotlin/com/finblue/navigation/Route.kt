@@ -17,7 +17,9 @@ sealed class Route(
 
     data object MainScreen : Route(route = "mainScreen")
 
-    data object PortfolioScreen : Route(route = "portfolioScreen")
+    data object PortfolioScreen : Route("portfolio_screen/{portfolioId}") {
+        fun createRoute(portfolioId: String) = "portfolio_screen/$portfolioId"
+    }
 
     data object CreateTransactionScreen : Route(route = "createTransactionScreen")
 }

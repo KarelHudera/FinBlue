@@ -35,7 +35,7 @@ import com.finblue.domain.model.Transaction
 @Composable
 fun TransactionItem(
     transaction: Transaction,
-    onRemove: () -> Unit,
+    onRemove: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -127,7 +127,7 @@ fun TransactionItem(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onRemove()
+                        onRemove(transaction.id)
                         showDeleteDialog = false
                     }
                 ) {

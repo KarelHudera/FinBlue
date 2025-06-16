@@ -45,13 +45,12 @@ sealed class Asset {
         override val name: String,
         override val createdAt: Long,
         val category: String, // 'real_estate', 'collectible', 'commodity'
-        val conditionDescription: String? = null,
         val description: String? = null,
         override val assetType: String = "other"
     ) : Asset()
 }
 
-// Extension functions for easy type checking
+// Extension functions
 fun Asset.isStock(): Boolean = this is Asset.Stock
 fun Asset.isCrypto(): Boolean = this is Asset.Crypto
 fun Asset.isFiat(): Boolean = this is Asset.Fiat

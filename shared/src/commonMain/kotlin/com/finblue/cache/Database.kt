@@ -1,17 +1,10 @@
 package com.finblue.cache
 
 import app.cash.sqldelight.Query
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.finblue.db.AppDatabase
-import com.finblue.db.SelectAssetsByPortfolio
 import com.finblue.domain.model.Portfolio
 import com.finblue.domain.model.Asset
 import com.finblue.domain.model.Transaction
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import com.finblue.db.Portfolios as PortfolioEntity
 import com.finblue.db.Assets as AssetEntity
 import com.finblue.db.Transactions as TransactionEntity
@@ -22,6 +15,21 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
 
     internal fun getAllPortfolios(): List<Portfolio> {
         return dbQuery.selectAllPortfolios().asDomainModelPortfolios()
+    }
+
+    internal fun getPortfolioById(portfolioId: String): Portfolio? {
+        return dbQuery.selectPortfolioById(portfolioId)
+            .executeAsOneOrNull()
+            ?.let { dbPortfolio: PortfolioEntity ->
+                Portfolio(
+                    id = dbPortfolio.portfolio_id,
+                    name = dbPortfolio.name,
+                    brokerBank = dbPortfolio.broker_bank,
+                    baseCurrency = dbPortfolio.base_currency,
+                    description = dbPortfolio.description,
+                    createdAt = dbPortfolio.created_at,
+                )
+            }
     }
 
     internal fun insertPortfolio(portfolio: Portfolio) {
@@ -83,7 +91,6 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                     dbQuery.insertOther(
                         asset_id = asset.id,
                         category = asset.category,
-                        condition_description = asset.conditionDescription,
                         description = asset.description
                     )
                 }
@@ -99,27 +106,6 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
         return dbQuery.selectAllTransactions().asDomainModelTransactions()
     }
 
-//    internal fun getAllTransactions(): Flow<List<Transaction>> {
-//        return dbQuery.selectAllTransactions()
-//            .asFlow()
-//            .mapToList(context = Dispatchers.IO)
-//            .map {
-//                it.map { dbTransaction ->
-//                    Transaction(
-//                        id = dbTransaction.transaction_id,
-//                        portfolioId = dbTransaction.portfolio_id,
-//                        assetId = dbTransaction.asset_id,
-//                        type = dbTransaction.type,
-//                        quantity = dbTransaction.quantity,
-//                        price = dbTransaction.price,
-//                        currency = dbTransaction.currency,
-//                        notes = dbTransaction.notes,
-//                        transactionDate = dbTransaction.transaction_date,
-//                        createdAt = dbTransaction.created_at
-//                    )
-//                }
-//            }
-//    }
 
     internal fun insertTransaction(transaction: Transaction) {
         dbQuery.insertTransaction(
@@ -166,10 +152,9 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
         }
     }
 
-    internal fun getAssetsByPortfolio(portfolioId: String): List<Asset> {
-        return dbQuery.selectAssetsByPortfolio(portfolioId)
-            .executeAsList()
-            .map { it.toDomainAsset() }
+    internal fun getTransactionsByPortfolio(portfolioId: String): List<Transaction> {
+        return dbQuery.selectTransactionsByPortfolio(portfolioId)
+            .asDomainModelTransactions()
     }
 
     // Extension functions to convert database entities to domain models
@@ -188,19 +173,15 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
 
     private fun Query<AssetEntity>.asDomainModelAssets(): List<Asset> {
         return executeAsList().map { dbAsset ->
-            // For basic retrieval, return a BasicAsset or determine specific type
-            // You might need additional queries to get type-specific data
             when (dbAsset.asset_type) {
                 "stock" -> {
-                    // You'd need to query the stocks table for exchange info
-                    // For now, returning basic asset - you can enhance this later
                     Asset.Stock(
                         id = dbAsset.asset_id,
                         portfolioId = dbAsset.portfolio_id,
                         symbol = dbAsset.symbol,
                         name = dbAsset.name,
                         createdAt = dbAsset.created_at,
-                        exchange = "UNKNOWN" // TODO: Query stocks table
+                        exchange = "UNKNOWN"
                     )
                 }
 
@@ -211,7 +192,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         symbol = dbAsset.symbol,
                         name = dbAsset.name,
                         createdAt = dbAsset.created_at,
-                        blockchain = "UNKNOWN" // TODO: Query crypto table
+                        blockchain = "UNKNOWN"
                     )
                 }
 
@@ -222,7 +203,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         symbol = dbAsset.symbol,
                         name = dbAsset.name,
                         createdAt = dbAsset.created_at,
-                        country = "UNKNOWN" // TODO: Query fiat table
+                        country = "UNKNOWN"
                     )
                 }
 
@@ -233,7 +214,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         symbol = dbAsset.symbol,
                         name = dbAsset.name,
                         createdAt = dbAsset.created_at,
-                        category = "collectible" // TODO: Query others table
+                        category = "collectible"
                     )
                 }
 
@@ -266,51 +247,6 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                 transactionDate = dbTransaction.transaction_date,
                 createdAt = dbTransaction.created_at
             )
-        }
-    }
-
-    private fun SelectAssetsByPortfolio.toDomainAsset(): Asset {
-        return when (asset_type) {
-            "stock" -> Asset.Stock(
-                id = asset_id,
-                portfolioId = portfolio_id,
-                symbol = symbol,
-                name = name,
-                createdAt = created_at,
-                exchange = exchange ?: throw IllegalStateException("Stock must have exchange")
-            )
-
-            "crypto" -> Asset.Crypto(
-                id = asset_id,
-                portfolioId = portfolio_id,
-                symbol = symbol,
-                name = name,
-                createdAt = created_at,
-                blockchain = blockchain
-                    ?: throw IllegalStateException("Crypto must have blockchain")
-            )
-
-            "fiat" -> Asset.Fiat(
-                id = asset_id,
-                portfolioId = portfolio_id,
-                symbol = symbol,
-                name = name,
-                createdAt = created_at,
-                country = country ?: throw IllegalStateException("Fiat must have country")
-            )
-
-            "other" -> Asset.Other(
-                id = asset_id,
-                portfolioId = portfolio_id,
-                symbol = symbol,
-                name = name,
-                createdAt = created_at,
-                category = category ?: throw IllegalStateException("Other must have category"),
-                conditionDescription = condition_description,
-                description = description
-            )
-
-            else -> throw IllegalArgumentException("Unknown asset type: $asset_type")
         }
     }
 }

@@ -1,13 +1,11 @@
 package com.finblue.viewmodel
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.finblue.data.repository.PortfolioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import com.finblue.domain.model.Portfolio
 import com.finblue.domain.model.Transaction
@@ -16,11 +14,20 @@ import com.finblue.utils.Async
 import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
 
+
+
 // UI States
 sealed class PortfolioListUiState {
     object Loading : PortfolioListUiState()
     data class Error(val message: String) : PortfolioListUiState()
     data class Success(val portfolios: List<Portfolio>) : PortfolioListUiState()
+}
+
+sealed class PortfolioDetailUiState {
+    object Loading : PortfolioDetailUiState()
+    data class Error(val message: String) : PortfolioDetailUiState()
+    data class Success(val portfolio: Portfolio) : PortfolioDetailUiState()
+    object NotFound : PortfolioDetailUiState()
 }
 
 sealed class TransactionListUiState {
@@ -50,6 +57,10 @@ class PortfolioViewModel(
     private val _portfolioState = MutableStateFlow<PortfolioListUiState>(PortfolioListUiState.Loading)
     val portfolioState: StateFlow<PortfolioListUiState> = _portfolioState.asStateFlow()
 
+    // Portfolio detail state (for single portfolio)
+    private val _portfolioDetailState = MutableStateFlow<PortfolioDetailUiState>(PortfolioDetailUiState.Loading)
+    val portfolioDetailState: StateFlow<PortfolioDetailUiState> = _portfolioDetailState.asStateFlow()
+
     // Transaction state
     private val _transactionState = MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
     val transactionState: StateFlow<TransactionListUiState> = _transactionState.asStateFlow()
@@ -62,37 +73,55 @@ class PortfolioViewModel(
     private val _operationState = MutableStateFlow<OperationUiState>(OperationUiState.Idle)
     val operationState: StateFlow<OperationUiState> = _operationState.asStateFlow()
 
-    // Selected portfolio for filtering transactions
-    private val _selectedPortfolioId = MutableStateFlow<String?>(null)
-    val selectedPortfolioId: StateFlow<String?> = _selectedPortfolioId.asStateFlow()
+    // Assets by portfolio state
+    private val _transactionByPortfolioState = MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
+    val assetsByPortfolioState: StateFlow<TransactionListUiState> = _transactionByPortfolioState.asStateFlow()
 
-    private val _assetsByPortfolioState = MutableStateFlow<AssetListUiState>(AssetListUiState.Loading)
-    val assetsByPortfolioState: StateFlow<AssetListUiState> = _assetsByPortfolioState
+    init {
+        createMainPortfolioIfNeeded()
+        loadInitialData()
+    }
 
-    fun loadAssetsByPortfolio(portfolioId: String) {
+    // Load portfolio by ID using repository method
+    fun loadPortfolioById(portfolioId: String) {
         viewModelScope.launch {
-            repository.getAssetsByPortfolio(portfolioId).collect { result ->
-                _assetsByPortfolioState.value = when (result) {
-                    is Async.Loading -> AssetListUiState.Loading
-                    is Async.Error -> AssetListUiState.Error(result.message)
-                    is Async.Success -> AssetListUiState.Success(result.data)
+            _portfolioDetailState.value = PortfolioDetailUiState.Loading
+
+            repository.getPortfolioById(portfolioId).collect { result ->
+                _portfolioDetailState.value = when (result) {
+                    is Async.Loading -> PortfolioDetailUiState.Loading
+                    is Async.Error -> PortfolioDetailUiState.Error(result.message)
+                    is Async.Success -> {
+                        if (result.data != null) {
+                            PortfolioDetailUiState.Success(result.data)
+                        } else {
+                            PortfolioDetailUiState.NotFound
+                        }
+                    }
                 }
             }
         }
     }
 
-    // Combined state for dashboard view
-    val dashboardState = combine(
-        portfolioState,
-        transactionState,
-        assetState
-    ) { portfolios, transactions, assets ->
-        DashboardState(portfolios, transactions, assets)
+    // Load assets by portfolio using repository method
+    fun loadTransactinsByPortfolio(portfolioId: String) {
+        viewModelScope.launch {
+            _transactionByPortfolioState.value = TransactionListUiState.Loading
+
+            repository.getTransactionsByPortfolio(portfolioId).collect { result ->
+                _transactionByPortfolioState.value = when (result) {
+                    is Async.Loading -> TransactionListUiState.Loading
+                    is Async.Error -> TransactionListUiState.Error(result.message)
+                    is Async.Success -> TransactionListUiState.Success(result.data)
+                }
+            }
+        }
     }
 
-    init {
-        createMainPortfolioIfNeeded()
-        loadInitialData()
+    // Combined function to load both portfolio and its assets
+    fun loadPortfolioWithAssets(portfolioId: String) {
+        loadPortfolioById(portfolioId)
+        loadTransactinsByPortfolio(portfolioId)
     }
 
     // Load all data
@@ -121,7 +150,6 @@ class PortfolioViewModel(
             }
         }
     }
-
 
     // Load transactions
     fun loadTransactions() {
@@ -296,23 +324,24 @@ class PortfolioViewModel(
         }
     }
 
-    // Filter transactions by portfolio
-    fun filterTransactionsByPortfolio(portfolioId: String?) {
-        _selectedPortfolioId.value = portfolioId
-        loadTransactions() // This will apply the filter
-    }
-
     // Clear operation state (call this after handling the operation result in UI)
     fun clearOperationState() {
         _operationState.value = OperationUiState.Idle
     }
+
+    // Clear portfolio detail state
+    fun clearPortfolioDetailState() {
+        _portfolioDetailState.value = PortfolioDetailUiState.Loading
+    }
+
+
 
     // Refresh all data
     fun refreshAll() {
         loadInitialData()
     }
 
-    // Get transactions for a specific portfolio
+    // Get transactions for a specific portfolio (from current state)
     fun getTransactionsForPortfolio(portfolioId: String): List<Transaction> {
         return when (val state = _transactionState.value) {
             is TransactionListUiState.Success -> {
@@ -322,7 +351,7 @@ class PortfolioViewModel(
         }
     }
 
-    // Get portfolio by ID
+    // Get portfolio by ID (from current state) - kept for backwards compatibility
     fun getPortfolioById(portfolioId: String): Portfolio? {
         return when (val state = _portfolioState.value) {
             is PortfolioListUiState.Success -> {
@@ -331,11 +360,13 @@ class PortfolioViewModel(
             else -> null
         }
     }
-}
 
-// Combined state for dashboard
-data class DashboardState(
-    val portfolios: PortfolioListUiState,
-    val transactions: TransactionListUiState,
-    val assets: AssetListUiState
-)
+    // Get current portfolio detail
+    fun getCurrentPortfolioDetail(): Portfolio? {
+        return when (val state = _portfolioDetailState.value) {
+            is PortfolioDetailUiState.Success -> state.portfolio
+            else -> null
+        }
+    }
+
+}

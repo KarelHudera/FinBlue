@@ -16,7 +16,8 @@ interface PortfolioRepositoryInterface {
     fun getAllPortfolios(): Flow<Async<List<Portfolio>>>
     fun getAllAssets(): Flow<Async<List<Asset>>>
     fun getAllTransactions(): Flow<Async<List<Transaction>>>
-    fun getAssetsByPortfolio(portfolioId: String): Flow<Async<List<Asset>>>
+    fun getPortfolioById(portfolioId: String): Flow<Async<Portfolio?>>
+    fun getTransactionsByPortfolio(portfolioId: String): Flow<Async<List<Transaction>>>
 
     suspend fun insertPortfolio(portfolio: Portfolio): Flow<Async<Unit>>
     suspend fun removePortfolio(portfolioId: String): Flow<Async<Unit>>
@@ -36,6 +37,18 @@ class PortfolioRepository(
     private val database: Database,
     private val ioDispatcher: CoroutineDispatcher
 ) : PortfolioRepositoryInterface {
+
+    override fun getPortfolioById(portfolioId: String): Flow<Async<Portfolio?>> = flow {
+        emit(Async.Loading)
+        try {
+            val portfolio = database.getPortfolioById(portfolioId)
+            Napier.d("🟩🟩 Successfully retrieved portfolio: $portfolioId")
+            emit(Async.Success(portfolio))
+        } catch (e: Exception) {
+            Napier.e("Failed to get portfolio: $portfolioId", e)
+            emit(Async.Error(e.message ?: "Unknown error occurred while fetching portfolio"))
+        }
+    }.flowOn(ioDispatcher)
 
     override fun getAllPortfolios(): Flow<Async<List<Portfolio>>> = flow {
         emit(Async.Loading)
@@ -73,10 +86,10 @@ class PortfolioRepository(
         }
     }.flowOn(ioDispatcher)
 
-    override fun getAssetsByPortfolio(portfolioId: String): Flow<Async<List<Asset>>> = flow {
+    override fun getTransactionsByPortfolio(portfolioId: String): Flow<Async<List<Transaction>>> = flow {
         emit(Async.Loading)
         try {
-            val assets = database.getAssetsByPortfolio(portfolioId)
+            val assets = database.getTransactionsByPortfolio(portfolioId)
             Napier.d("\uD83D\uDFE9\uD83D\uDFE9 Successfully retrieved ${assets.size} assets for portfolio: $portfolioId")
             emit(Async.Success(assets))
         } catch (e: Exception) {
