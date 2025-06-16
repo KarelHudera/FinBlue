@@ -93,6 +93,7 @@ moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-re
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 androidx-navigation-common-android = { group = "androidx.navigation", name = "navigation-common-android", version.ref = "navigationCommonAndroid" }
+sqlDelight-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 
 [plugins]
 # Android Plugins

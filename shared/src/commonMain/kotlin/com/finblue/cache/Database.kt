@@ -1,11 +1,17 @@
 package com.finblue.cache
 
 import app.cash.sqldelight.Query
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import com.finblue.db.AppDatabase
 import com.finblue.db.SelectAssetsByPortfolio
 import com.finblue.domain.model.Portfolio
 import com.finblue.domain.model.Asset
 import com.finblue.domain.model.Transaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import com.finblue.db.Portfolios as PortfolioEntity
 import com.finblue.db.Assets as AssetEntity
 import com.finblue.db.Transactions as TransactionEntity
@@ -58,18 +64,21 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         exchange = asset.exchange
                     )
                 }
+
                 is Asset.Crypto -> {
                     dbQuery.insertCrypto(
                         asset_id = asset.id,
                         blockchain = asset.blockchain
                     )
                 }
+
                 is Asset.Fiat -> {
                     dbQuery.insertFiat(
                         asset_id = asset.id,
                         country = asset.country
                     )
                 }
+
                 is Asset.Other -> {
                     dbQuery.insertOther(
                         asset_id = asset.id,
@@ -86,10 +95,31 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
         dbQuery.removeAsset(assetId)
     }
 
-    // Transaction operations
     internal fun getAllTransactions(): List<Transaction> {
         return dbQuery.selectAllTransactions().asDomainModelTransactions()
     }
+
+//    internal fun getAllTransactions(): Flow<List<Transaction>> {
+//        return dbQuery.selectAllTransactions()
+//            .asFlow()
+//            .mapToList(context = Dispatchers.IO)
+//            .map {
+//                it.map { dbTransaction ->
+//                    Transaction(
+//                        id = dbTransaction.transaction_id,
+//                        portfolioId = dbTransaction.portfolio_id,
+//                        assetId = dbTransaction.asset_id,
+//                        type = dbTransaction.type,
+//                        quantity = dbTransaction.quantity,
+//                        price = dbTransaction.price,
+//                        currency = dbTransaction.currency,
+//                        notes = dbTransaction.notes,
+//                        transactionDate = dbTransaction.transaction_date,
+//                        createdAt = dbTransaction.created_at
+//                    )
+//                }
+//            }
+//    }
 
     internal fun insertTransaction(transaction: Transaction) {
         dbQuery.insertTransaction(
@@ -173,6 +203,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         exchange = "UNKNOWN" // TODO: Query stocks table
                     )
                 }
+
                 "crypto" -> {
                     Asset.Crypto(
                         id = dbAsset.asset_id,
@@ -183,6 +214,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         blockchain = "UNKNOWN" // TODO: Query crypto table
                     )
                 }
+
                 "fiat" -> {
                     Asset.Fiat(
                         id = dbAsset.asset_id,
@@ -193,6 +225,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         country = "UNKNOWN" // TODO: Query fiat table
                     )
                 }
+
                 "other" -> {
                     Asset.Other(
                         id = dbAsset.asset_id,
@@ -203,6 +236,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         category = "collectible" // TODO: Query others table
                     )
                 }
+
                 else -> {
                     // Fallback to Other type for unknown asset types
                     Asset.Other(
@@ -245,14 +279,17 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                 createdAt = created_at,
                 exchange = exchange ?: throw IllegalStateException("Stock must have exchange")
             )
+
             "crypto" -> Asset.Crypto(
                 id = asset_id,
                 portfolioId = portfolio_id,
                 symbol = symbol,
                 name = name,
                 createdAt = created_at,
-                blockchain = blockchain ?: throw IllegalStateException("Crypto must have blockchain")
+                blockchain = blockchain
+                    ?: throw IllegalStateException("Crypto must have blockchain")
             )
+
             "fiat" -> Asset.Fiat(
                 id = asset_id,
                 portfolioId = portfolio_id,
@@ -261,6 +298,7 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                 createdAt = created_at,
                 country = country ?: throw IllegalStateException("Fiat must have country")
             )
+
             "other" -> Asset.Other(
                 id = asset_id,
                 portfolioId = portfolio_id,
@@ -271,8 +309,8 @@ class Database(databaseDriverFactory: DatabaseDriverFactory) {
                 conditionDescription = condition_description,
                 description = description
             )
+
             else -> throw IllegalArgumentException("Unknown asset type: $asset_type")
         }
     }
 }
-

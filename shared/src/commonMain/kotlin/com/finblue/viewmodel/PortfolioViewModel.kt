@@ -96,7 +96,7 @@ class PortfolioViewModel(
     }
 
     // Load all data
-    private fun loadInitialData() {
+    fun loadInitialData() {
         loadPortfolios()
         loadTransactions()
         loadAssets()
@@ -131,12 +131,7 @@ class PortfolioViewModel(
                     is Async.Loading -> TransactionListUiState.Loading
                     is Async.Error -> TransactionListUiState.Error(result.message)
                     is Async.Success -> {
-                        val filteredTransactions = if (_selectedPortfolioId.value != null) {
-                            result.data.filter { it.portfolioId == _selectedPortfolioId.value }
-                        } else {
-                            result.data
-                        }
-                        TransactionListUiState.Success(filteredTransactions)
+                        TransactionListUiState.Success(result.data)
                     }
                 }
             }
@@ -167,7 +162,7 @@ class PortfolioViewModel(
     }
 
     // Create main portfolio (default portfolio)
-    fun createMainPortfolio() {
+    private fun createMainPortfolio() {
         val mainPortfolio = Portfolio(
             id = "5e7d6795-8f40-4130-9f4a-e5dc0afe9957",
             name = "Default Portfolio",

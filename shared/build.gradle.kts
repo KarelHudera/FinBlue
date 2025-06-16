@@ -75,6 +75,8 @@ kotlin {
             implementation(libs.moko.resources)
 
             implementation(libs.kotlinx.datetime)
+
+            implementation(libs.sqlDelight.extensions)
         }
 
         commonTest.dependencies {

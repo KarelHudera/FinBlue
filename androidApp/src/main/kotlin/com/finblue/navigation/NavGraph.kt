@@ -1,8 +1,12 @@
 package com.finblue.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -12,9 +16,10 @@ import androidx.navigation.navigation
 import com.finblue.PortfolioScreen
 import com.finblue.common.ErrorScreen
 import com.finblue.common.ProgressScreen
-import com.finblue.screens.CreateTransactionScreen
 import com.finblue.viewmodel.PortfolioListUiState
 import com.finblue.viewmodel.PortfolioViewModel
+import com.finblue.viewmodel.TransactionListUiState
+import kotlinx.coroutines.flow.combine
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -44,28 +49,48 @@ fun NavGraph(
 }
 
 @Composable
-private fun MainScreenContent(
+fun MainScreenContent(
     navController: NavController,
-    viewModel: PortfolioViewModel = koinViewModel<PortfolioViewModel>()
+    viewModel: PortfolioViewModel = koinViewModel()
 ) {
-    // Collect the portfolio state from the ViewModel
-    val portfolioState by viewModel.portfolioState.collectAsStateWithLifecycle()
-
-    when (val currentState = portfolioState) {
-        is PortfolioListUiState.Loading -> ProgressScreen()
-        is PortfolioListUiState.Error -> ErrorScreen(currentState.message) {
-            viewModel.loadPortfolios()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val combinedState by remember {
+        combine(
+            viewModel.portfolioState,
+            viewModel.transactionState
+        ) { portfolioState, transactionState ->
+            portfolioState to transactionState
         }
+    }.collectAsStateWithLifecycle(
+        initialValue = PortfolioListUiState.Loading to TransactionListUiState.Loading,
+        lifecycle = lifecycleOwner.lifecycle
+    )
+
+    val (portfolioState, transactionState) = combinedState
+
+    when (portfolioState) {
+        is PortfolioListUiState.Loading -> ProgressScreen()
+
+        is PortfolioListUiState.Error -> ErrorScreen(
+            message = portfolioState.message,
+            refresh = viewModel::loadInitialData
+        )
 
         is PortfolioListUiState.Success -> {
+            viewModel.loadInitialData()
+
+            val transactions = when (transactionState) {
+                is TransactionListUiState.Success -> transactionState.transactions
+                else -> emptyList()
+            }
             PortfolioScreen(
-                portfolios =  currentState.portfolios,
-                onCreatePortfolio = { portfolio ->
-                    viewModel.createPortfolio(portfolio)
-                },
+                portfolios = portfolioState.portfolios,
+                onCreatePortfolio = viewModel::createPortfolio,
                 onNavigateToCreateTransaction = {
                     navController.navigate(Route.CreateTransactionScreen.route)
-                }
+                },
+                transactions = transactions,
+                onRemoveTransaction = viewModel::removeTransaction
             )
         }
     }
@@ -77,9 +102,9 @@ private fun PortfolioScreenContent(navController: NavController) {
     // You can add your PortfolioDetailScreen composable here
 
     // Example placeholder - replace with your actual screen
-    androidx.compose.material3.Text(
+    Text(
         text = "Portfolio Screen - TODO: Implement",
-        modifier = androidx.compose.ui.Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     )
 }
 
