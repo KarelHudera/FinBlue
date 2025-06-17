@@ -35,10 +35,8 @@ import com.finblue.common.EmptyTransactionsMessage
 import com.finblue.common.TransactionItem
 import com.finblue.navigation.Route
 import com.finblue.utils.Dimens.FB_16_dp
-import com.finblue.utils.Dimens.FB_4_dp
 import com.finblue.viewmodel.PortfolioViewModel
 import com.finblue.viewmodel.TransactionListUiState
-import io.ktor.http.hostIsIp
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

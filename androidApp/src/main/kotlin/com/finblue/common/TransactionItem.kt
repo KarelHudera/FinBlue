@@ -143,9 +143,8 @@ fun TransactionItem(
     }
 }
 
-// Helper function to format date (you might need to adjust this based on your date format)
+// Helper function to format date
 private fun formatDate(timestamp: Long): String {
-    // This is a simple implementation - you might want to use a proper date formatting library
     return java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
         .format(java.util.Date(timestamp))
 }

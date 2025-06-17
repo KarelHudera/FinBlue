@@ -4,7 +4,7 @@ CREATE TABLE portfolios (
     broker_bank TEXT,
     base_currency TEXT NOT NULL,
     description TEXT,
-    created_at INTEGER NOT NULL -- Unix timestamp
+    created_at INTEGER NOT NULL
 );
 
 CREATE INDEX portfolios_name ON portfolios(name);
@@ -16,7 +16,7 @@ CREATE TABLE assets (
     symbol TEXT NOT NULL,
     name TEXT NOT NULL,
     asset_type TEXT NOT NULL CHECK (asset_type IN ('stock', 'crypto', 'fiat', 'other')),
-    created_at INTEGER NOT NULL, -- Unix timestamp
+    created_at INTEGER NOT NULL,
     FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE
 );
 
@@ -59,8 +59,8 @@ CREATE TABLE transactions (
     price REAL NOT NULL,
     currency TEXT NOT NULL,
     notes TEXT,
-    transaction_date INTEGER NOT NULL, -- Unix timestamp
-    created_at INTEGER NOT NULL, -- Unix timestamp
+    transaction_date INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
     FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE,
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
 );

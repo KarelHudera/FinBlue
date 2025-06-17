@@ -15,7 +15,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
 
 
-
 // UI States
 sealed class PortfolioListUiState {
     object Loading : PortfolioListUiState()
@@ -27,7 +26,6 @@ sealed class PortfolioDetailUiState {
     object Loading : PortfolioDetailUiState()
     data class Error(val message: String) : PortfolioDetailUiState()
     data class Success(val portfolio: Portfolio) : PortfolioDetailUiState()
-    object NotFound : PortfolioDetailUiState()
 }
 
 sealed class TransactionListUiState {
@@ -54,15 +52,19 @@ class PortfolioViewModel(
 ) : ViewModel() {
 
     // Portfolio state
-    private val _portfolioState = MutableStateFlow<PortfolioListUiState>(PortfolioListUiState.Loading)
+    private val _portfolioState =
+        MutableStateFlow<PortfolioListUiState>(PortfolioListUiState.Loading)
     val portfolioState: StateFlow<PortfolioListUiState> = _portfolioState.asStateFlow()
 
     // Portfolio detail state (for single portfolio)
-    private val _portfolioDetailState = MutableStateFlow<PortfolioDetailUiState>(PortfolioDetailUiState.Loading)
-    val portfolioDetailState: StateFlow<PortfolioDetailUiState> = _portfolioDetailState.asStateFlow()
+    private val _portfolioDetailState =
+        MutableStateFlow<PortfolioDetailUiState>(PortfolioDetailUiState.Loading)
+    val portfolioDetailState: StateFlow<PortfolioDetailUiState> =
+        _portfolioDetailState.asStateFlow()
 
     // Transaction state
-    private val _transactionState = MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
+    private val _transactionState =
+        MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
     val transactionState: StateFlow<TransactionListUiState> = _transactionState.asStateFlow()
 
     // Asset state
@@ -74,36 +76,16 @@ class PortfolioViewModel(
     val operationState: StateFlow<OperationUiState> = _operationState.asStateFlow()
 
     // Assets by portfolio state
-    private val _transactionByPortfolioState = MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
-    val assetsByPortfolioState: StateFlow<TransactionListUiState> = _transactionByPortfolioState.asStateFlow()
+    private val _transactionByPortfolioState =
+        MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
+    val assetsByPortfolioState: StateFlow<TransactionListUiState> =
+        _transactionByPortfolioState.asStateFlow()
 
     init {
         createMainPortfolioIfNeeded()
         loadInitialData()
     }
 
-    // Load portfolio by ID using repository method
-    fun loadPortfolioById(portfolioId: String) {
-        viewModelScope.launch {
-            _portfolioDetailState.value = PortfolioDetailUiState.Loading
-
-            repository.getPortfolioById(portfolioId).collect { result ->
-                _portfolioDetailState.value = when (result) {
-                    is Async.Loading -> PortfolioDetailUiState.Loading
-                    is Async.Error -> PortfolioDetailUiState.Error(result.message)
-                    is Async.Success -> {
-                        if (result.data != null) {
-                            PortfolioDetailUiState.Success(result.data)
-                        } else {
-                            PortfolioDetailUiState.NotFound
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Load assets by portfolio using repository method
     fun loadTransactinsByPortfolio(portfolioId: String) {
         viewModelScope.launch {
             _transactionByPortfolioState.value = TransactionListUiState.Loading
@@ -118,12 +100,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Combined function to load both portfolio and its assets
-    fun loadPortfolioWithAssets(portfolioId: String) {
-        loadPortfolioById(portfolioId)
-        loadTransactinsByPortfolio(portfolioId)
-    }
-
     // Load all data
     fun loadInitialData() {
         loadPortfolios()
@@ -131,13 +107,14 @@ class PortfolioViewModel(
         loadAssets()
     }
 
-    // Load portfolios
-    fun loadPortfolios() {
+    private fun loadPortfolios() {
         viewModelScope.launch {
             repository.getAllPortfolios().collect { result ->
                 when (result) {
                     is Async.Loading -> _portfolioState.value = PortfolioListUiState.Loading
-                    is Async.Error -> _portfolioState.value = PortfolioListUiState.Error(result.message)
+                    is Async.Error -> _portfolioState.value =
+                        PortfolioListUiState.Error(result.message)
+
                     is Async.Success -> {
                         _portfolioState.value = PortfolioListUiState.Success(result.data)
 
@@ -151,7 +128,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Load transactions
     fun loadTransactions() {
         viewModelScope.launch {
             repository.getAllTransactions().collect { result ->
@@ -166,7 +142,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Load assets
     fun loadAssets() {
         viewModelScope.launch {
             repository.getAllAssets().collect { result ->
@@ -212,12 +187,16 @@ class PortfolioViewModel(
                     is Async.Loading -> {
                         // Already handled above
                     }
+
                     is Async.Error -> {
-                        _operationState.value = OperationUiState.Error("Failed to create portfolio: ${result.message}")
+                        _operationState.value =
+                            OperationUiState.Error("Failed to create portfolio: ${result.message}")
                         Napier.e("Failed to create portfolio: ${result.message}")
                     }
+
                     is Async.Success -> {
-                        _operationState.value = OperationUiState.Success("Portfolio created successfully")
+                        _operationState.value =
+                            OperationUiState.Success("Portfolio created successfully")
                         loadPortfolios() // Refresh the list
                         Napier.d("Portfolio created successfully: ${portfolio.name}")
                     }
@@ -235,13 +214,17 @@ class PortfolioViewModel(
                     is Async.Loading -> {
                         // Already handled above
                     }
+
                     is Async.Error -> {
-                        _operationState.value = OperationUiState.Error("Failed to create asset: ${result.message}")
+                        _operationState.value =
+                            OperationUiState.Error("Failed to create asset: ${result.message}")
                         Napier.e("❌ Failed to create asset: ${result.message}")
                     }
+
                     is Async.Success -> {
-                        _operationState.value = OperationUiState.Success("Asset created successfully")
-                        loadAssets() // Refresh the asset list
+                        _operationState.value =
+                            OperationUiState.Success("Asset created successfully")
+                        loadAssets() // Refresh
                         Napier.d("✅ Asset created successfully: ${asset.name}")
                     }
                 }
@@ -249,7 +232,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Remove portfolio
     fun removePortfolio(portfolioId: String) {
         viewModelScope.launch {
             _operationState.value = OperationUiState.Loading
@@ -259,14 +241,18 @@ class PortfolioViewModel(
                     is Async.Loading -> {
                         // Already handled above
                     }
+
                     is Async.Error -> {
-                        _operationState.value = OperationUiState.Error("Failed to remove portfolio: ${result.message}")
+                        _operationState.value =
+                            OperationUiState.Error("Failed to remove portfolio: ${result.message}")
                         Napier.e("Failed to remove portfolio: ${result.message}")
                     }
+
                     is Async.Success -> {
-                        _operationState.value = OperationUiState.Success("Portfolio removed successfully")
-                        loadPortfolios() // Refresh the list
-                        loadTransactions() // Refresh transactions as they might be affected
+                        _operationState.value =
+                            OperationUiState.Success("Portfolio removed successfully")
+                        loadPortfolios() // Refresh
+                        loadTransactions() // Refresh
                         Napier.d("Portfolio removed successfully: $portfolioId")
                     }
                 }
@@ -274,7 +260,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Add transaction
     fun addTransaction(transaction: Transaction) {
         viewModelScope.launch {
             _operationState.value = OperationUiState.Loading
@@ -284,12 +269,16 @@ class PortfolioViewModel(
                     is Async.Loading -> {
                         // Already handled above
                     }
+
                     is Async.Error -> {
-                        _operationState.value = OperationUiState.Error("Failed to add transaction: ${result.message}")
+                        _operationState.value =
+                            OperationUiState.Error("Failed to add transaction: ${result.message}")
                         Napier.e("Failed to add transaction: ${result.message}")
                     }
+
                     is Async.Success -> {
-                        _operationState.value = OperationUiState.Success("Transaction added successfully")
+                        _operationState.value =
+                            OperationUiState.Success("Transaction added successfully")
                         loadTransactions() // Refresh the list
                         loadPortfolios() // Refresh portfolios as values might change
                         Napier.d("Transaction added successfully: ${transaction.id}")
@@ -299,7 +288,6 @@ class PortfolioViewModel(
         }
     }
 
-    // Remove transaction
     fun removeTransaction(transactionId: String) {
         viewModelScope.launch {
             _operationState.value = OperationUiState.Loading
@@ -309,12 +297,16 @@ class PortfolioViewModel(
                     is Async.Loading -> {
                         // Already handled above
                     }
+
                     is Async.Error -> {
-                        _operationState.value = OperationUiState.Error("Failed to remove transaction: ${result.message}")
+                        _operationState.value =
+                            OperationUiState.Error("Failed to remove transaction: ${result.message}")
                         Napier.e("Failed to remove transaction: ${result.message}")
                     }
+
                     is Async.Success -> {
-                        _operationState.value = OperationUiState.Success("Transaction removed successfully")
+                        _operationState.value =
+                            OperationUiState.Success("Transaction removed successfully")
                         loadTransactions() // Refresh the list
                         loadPortfolios() // Refresh portfolios as values might change
                         Napier.d("Transaction removed successfully: $transactionId")
@@ -324,49 +316,18 @@ class PortfolioViewModel(
         }
     }
 
-    // Clear operation state (call this after handling the operation result in UI)
+    // Clear operation state
     fun clearOperationState() {
         _operationState.value = OperationUiState.Idle
     }
 
-    // Clear portfolio detail state
-    fun clearPortfolioDetailState() {
-        _portfolioDetailState.value = PortfolioDetailUiState.Loading
-    }
-
-
-
-    // Refresh all data
-    fun refreshAll() {
-        loadInitialData()
-    }
-
-    // Get transactions for a specific portfolio (from current state)
-    fun getTransactionsForPortfolio(portfolioId: String): List<Transaction> {
-        return when (val state = _transactionState.value) {
-            is TransactionListUiState.Success -> {
-                state.transactions.filter { it.portfolioId == portfolioId }
-            }
-            else -> emptyList()
-        }
-    }
-
-    // Get portfolio by ID (from current state) - kept for backwards compatibility
     fun getPortfolioById(portfolioId: String): Portfolio? {
         return when (val state = _portfolioState.value) {
             is PortfolioListUiState.Success -> {
                 state.portfolios.find { it.id == portfolioId }
             }
+
             else -> null
         }
     }
-
-    // Get current portfolio detail
-    fun getCurrentPortfolioDetail(): Portfolio? {
-        return when (val state = _portfolioDetailState.value) {
-            is PortfolioDetailUiState.Success -> state.portfolio
-            else -> null
-        }
-    }
-
 }
