@@ -12,8 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.finblue.utils.getRetryText
+import com.finblue.utils.Dimens.FB_16_dp
 
 @Composable
 fun ErrorScreen(message: String, refresh: () -> Unit) {
@@ -26,7 +26,7 @@ fun ErrorScreen(message: String, refresh: () -> Unit) {
             text = message,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(FB_16_dp))
         Button(
             onClick = refresh,
             colors = ButtonDefaults.buttonColors(

@@ -8,6 +8,25 @@
 [![FinBlue Android](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-Android.yml?branch=main&logo=Android&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-Android.yml)
 [![FinBlue iOS](https://img.shields.io/github/actions/workflow/status/KarelHudera/FinBlue/FinBlue-iOS.yml?branch-main&logo=Apple&style=plastic)](https://github.com/KarelHudera/FinBlue/blob/main/.github/workflows/FinBlue-iOS.yml)
 
+## About
+
+**FinBlue** is a personal finance and portfolio management application designed to provide users with a clear and structured overview of their investments across various asset classes. Whether you’re managing traditional assets like stocks and fiat currencies or alternative investments such as art, gold, and other commodities, FinBlue helps you stay organized and in control.
+
+Key benefits include:
+
+- **Comprehensive Asset Tracking**: Monitor a wide range of assets, including equities, cryptocurrencies, fiat currencies, precious metals, commodities, and alternative assets like art and collectibles.
+    
+- **Multi-Portfolio Support**: Manage multiple portfolios, each associated with different brokers or banks, allowing for organized tracking of diversified holdings.
+    
+- **Detailed Transaction Logging**: Record transactions with specifics such as type (buy/sell), quantity, price, currency, and notes, providing a thorough history of your investment activities.
+    
+- **Structured Data Management**: Utilize a well-defined database schema that categorizes assets and transactions effectively, enhancing data clarity and retrieval.
+    
+- **Privacy-Focused**: All data is stored locally on your device, ensuring that your financial information remains private and secure.
+    
+
+FinBlue is designed to be flexible and user-centric, making it suitable for both personal finance enthusiasts and advanced portfolio managers seeking a unified view of their diverse investments.
+
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
 * `/androidApp` is for code that will be shared across your Compose Multiplatform applications.

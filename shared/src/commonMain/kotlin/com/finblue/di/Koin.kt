@@ -4,9 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import com.finblue.data.network.jsonModule
 import com.finblue.data.network.ktorModule
-import com.finblue.data.repository.MovieFeedRepository
-import com.finblue.domain.repository.BaseFeedRepository
-import com.finblue.viewmodel.FeedViewModel
+import com.finblue.data.repository.PortfolioRepository
+import com.finblue.viewmodel.PortfolioViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
@@ -30,11 +29,11 @@ fun initKoin(config: KoinAppDeclaration? = null) {
 }
 
 val repositoryModule = module {
-    single<BaseFeedRepository> { MovieFeedRepository(get(), get(), get(named("io"))) }
+    single<PortfolioRepository> { PortfolioRepository(get(), get(named("io"))) }
 }
 
 val viewModelModule = module {
-    viewModelOf(::FeedViewModel)
+    viewModelOf(::PortfolioViewModel)
 }
 
 val dispatcherModule = module {
@@ -43,4 +42,4 @@ val dispatcherModule = module {
 
 expect fun databaseModule(): Module
 
-fun getFeedViewModel(): FeedViewModel = KoinPlatform.getKoin().get()
+fun getPortfolioViewModel(): PortfolioViewModel = KoinPlatform.getKoin().get()

@@ -1,54 +1,149 @@
-CREATE TABLE ParentTable (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    order_index INTEGER NOT NULL
-);
-
-
-CREATE INDEX ParentTable_order_index ON ParentTable(order_index);
-
-CREATE TABLE MovieTable (
-    id INTEGER NOT NULL,
-    overview TEXT NOT NULL,
-    releaseDate TEXT,
-    posterPath TEXT,
-    backdropPath TEXT,
+CREATE TABLE portfolios (
+    portfolio_id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
-    voteAverage REAL NOT NULL,
-    voteCount INTEGER NOT NULL,
-    order_index INTEGER NOT NULL,
-    parent_id INTEGER NOT NULL,
-    FOREIGN KEY (parent_id) REFERENCES ParentTable(id)
+    broker_bank TEXT,
+    base_currency TEXT NOT NULL,
+    description TEXT,
+    created_at INTEGER NOT NULL
 );
 
-CREATE INDEX MovieTable_order_index ON MovieTable(order_index);
-CREATE INDEX MovieTable_parent_order_index ON MovieTable(parent_id, order_index);
+CREATE INDEX portfolios_name ON portfolios(name);
+CREATE INDEX portfolios_created_at ON portfolios(created_at);
 
-selectParentsOrdered:
-SELECT id
-FROM ParentTable
-ORDER BY order_index ASC;
+CREATE TABLE assets (
+    asset_id TEXT NOT NULL PRIMARY KEY,
+    portfolio_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    name TEXT NOT NULL,
+    asset_type TEXT NOT NULL CHECK (asset_type IN ('stock', 'crypto', 'fiat', 'other')),
+    created_at INTEGER NOT NULL,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE
+);
 
-selectParentId:
-SELECT id
-FROM ParentTable
-WHERE order_index = ?;
+CREATE INDEX assets_portfolio_id ON assets(portfolio_id);
+CREATE INDEX assets_symbol ON assets(symbol);
+CREATE INDEX assets_asset_type ON assets(asset_type);
+CREATE INDEX assets_created_at ON assets(created_at);
 
-selectMoviesOrdered:
-SELECT MovieTable.*
-FROM MovieTable
-WHERE parent_id = ?
-ORDER BY order_index ASC;
+CREATE TABLE stocks (
+    asset_id TEXT NOT NULL PRIMARY KEY,
+    exchange TEXT NOT NULL,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
+);
 
-insertParent:
-INSERT INTO ParentTable (order_index)
-VALUES (?);
+CREATE TABLE crypto (
+    asset_id TEXT NOT NULL PRIMARY KEY,
+    blockchain TEXT NOT NULL,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
+);
 
-insert:
-INSERT INTO MovieTable (id, overview, releaseDate, posterPath, backdropPath, name, voteAverage, voteCount, order_index, parent_id)
+CREATE TABLE fiat (
+    asset_id TEXT NOT NULL PRIMARY KEY,
+    country TEXT NOT NULL,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
+);
+
+CREATE TABLE others (
+    asset_id TEXT NOT NULL PRIMARY KEY,
+    category TEXT NOT NULL CHECK (category IN ('real_estate', 'collectible', 'commodity')),
+    description TEXT,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
+);
+
+CREATE TABLE transactions (
+    transaction_id TEXT NOT NULL PRIMARY KEY,
+    portfolio_id TEXT NOT NULL,
+    asset_id TEXT NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('buy', 'sell', 'dividend')),
+    quantity REAL NOT NULL,
+    price REAL NOT NULL,
+    currency TEXT NOT NULL,
+    notes TEXT,
+    transaction_date INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE
+);
+
+CREATE INDEX transactions_portfolio_id ON transactions(portfolio_id);
+CREATE INDEX transactions_asset_id ON transactions(asset_id);
+CREATE INDEX transactions_type ON transactions(type);
+CREATE INDEX transactions_transaction_date ON transactions(transaction_date);
+CREATE INDEX transactions_created_at ON transactions(created_at);
+
+selectAllPortfolios:
+SELECT *
+FROM portfolios
+ORDER BY created_at DESC;
+
+selectPortfolioById:
+SELECT *
+FROM portfolios
+WHERE portfolio_id = ?;
+
+insertPortfolio:
+INSERT INTO portfolios (portfolio_id, name, broker_bank, base_currency, description, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+removePortfolio:
+DELETE FROM portfolios
+WHERE portfolio_id = ?;
+
+selectAllAssets:
+SELECT *
+FROM assets
+ORDER BY created_at DESC;
+
+selectAllTransactions:
+SELECT *
+FROM transactions
+ORDER BY transaction_date DESC;
+
+insertTransaction:
+INSERT INTO transactions (transaction_id, portfolio_id, asset_id, type, quantity, price, currency, notes, transaction_date, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
-removeAll:
-DELETE FROM ParentTable;
+removeTransaction:
+DELETE FROM transactions
+WHERE transaction_id = ?;
 
-removeAllMovies:
-DELETE FROM MovieTable;
+insertAsset:
+INSERT INTO assets (asset_id, portfolio_id, symbol, name, asset_type, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+removeAsset:
+DELETE FROM assets
+WHERE asset_id = ?;
+
+insertStock:
+INSERT INTO stocks (asset_id, exchange)
+VALUES (?, ?);
+
+insertCrypto:
+INSERT INTO crypto (asset_id, blockchain)
+VALUES (?, ?);
+
+insertFiat:
+INSERT INTO fiat (asset_id, country)
+VALUES (?, ?);
+
+insertOther:
+INSERT INTO others (asset_id, category, description)
+VALUES (?, ?,  ?);
+
+
+selectTransactionsByPortfolio:
+SELECT
+    transaction_id,
+    portfolio_id,
+    asset_id,
+    type,
+    quantity,
+    price,
+    currency,
+    notes,
+    transaction_date,
+    created_at
+FROM transactions
+WHERE portfolio_id = ?
+ORDER BY transaction_date DESC;
