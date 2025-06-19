@@ -12,6 +12,7 @@ import com.finblue.domain.model.Transaction
 import com.finblue.domain.model.Asset
 import com.finblue.utils.Async
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 
 
@@ -102,9 +103,12 @@ class PortfolioViewModel(
 
     // Load all data
     fun loadInitialData() {
-        loadPortfolios()
-        loadTransactions()
-        loadAssets()
+        viewModelScope.launch {
+            delay(1500)
+            loadPortfolios()
+            loadTransactions()
+            loadAssets()
+        }
     }
 
     private fun loadPortfolios() {
